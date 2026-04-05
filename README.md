@@ -77,11 +77,30 @@ GROQ_API_KEY=your_groq_api_key
 Environment variables supported by the app:
 
 - `GROQ_API_KEY`: required for chat generation
+- `DOCUMIND_STORAGE_DIR`: optional override for where local chat history and Chroma indexes are stored
 - `GROQ_MODEL`: optional override for the main answer model
 - `GROQ_REWRITE_MODEL`: optional override for the query rewrite model
 - `GROQ_ANSWER_FALLBACK_MODEL`: optional fallback when the main answer model is rate limited
 
 The default UI/theme and Streamlit server behavior live in `.streamlit/config.toml`.
+
+## Deploy on Render
+
+This repository includes a ready-to-use `render.yaml` for Render Blueprint deployment.
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/qiwCodes/documind-ai)
+
+Render configuration:
+
+- Build command: `pip install -r requirements.txt`
+- Start command: `streamlit run app.py --server.address 0.0.0.0 --server.port $PORT`
+- Required secret: `GROQ_API_KEY`
+- Default plan in `render.yaml`: `free`
+
+Deployment notes:
+
+- Free Render web services use an ephemeral filesystem, so saved chat history, uploaded PDF copies, and Chroma indexes are lost after redeploys, restarts, or idle spin-down.
+- If you need persistent conversations and document indexes, upgrade to a paid web service and attach a persistent disk, then set `DOCUMIND_STORAGE_DIR` to a path on that disk.
 
 ## Notes
 

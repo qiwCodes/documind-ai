@@ -8,11 +8,16 @@ def _env_str(key: str, default: str) -> str:
     v = (os.environ.get(key) or "").strip()
     return v if v else default
 
+
+def _env_path(key: str, default: str) -> Path:
+    v = (os.environ.get(key) or "").strip()
+    return Path(v) if v else Path(default)
+
 # ---------------------------------------------------------------------------
 # Config — relative paths so the app works when deployed (cwd = project root).
 # Chroma persistence lives under ./db_storage (was ./db in earlier versions).
 # ---------------------------------------------------------------------------
-DB_STORAGE_DIR = Path("db_storage")
+DB_STORAGE_DIR = _env_path("DOCUMIND_STORAGE_DIR", "db_storage")
 EMBED_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 GROQ_MODEL = _env_str("GROQ_MODEL", "llama-3.3-70b-versatile")
 # Smaller Groq model for the extra retrieval-time rewrite call (low latency).
