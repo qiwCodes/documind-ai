@@ -1,0 +1,12 @@
+[theme]
+primaryColor = "#2563eb"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f4f6f8"
+textColor = "#1e293b"
+font = "sans serif"
+
+[server]
+headless = true
+# Avoid traversing Hugging Face `transformers` lazy submodules (e.g. zoedepth → torchvision)
+# which raises ModuleNotFoundError during reload introspection on Windows.
+fileWatcherType = "none"
