@@ -12,6 +12,11 @@ import uuid
 from pathlib import Path
 
 import streamlit as st
+
+# Chroma's OpenTelemetry dependency can load older generated protobuf modules.
+# Force python protobuf runtime to avoid "Descriptors cannot be created directly"
+# crashes with newer protobuf wheels in hosted environments.
+os.environ.setdefault("PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION", "python")
 from langchain_chroma import Chroma
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_huggingface import HuggingFaceEmbeddings

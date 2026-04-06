@@ -22,3 +22,4 @@ db_storage/
 
 .DS_Store
 Thumbs.db
+.playwright-mcp/
