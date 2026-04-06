@@ -22,18 +22,24 @@ def get_groq_api_key() -> str | None:
     """
     Resolve GROQ_API_KEY for deployment vs local dev.
 
-    Order: ``st.secrets`` first (Streamlit Cloud / ``.streamlit/secrets.toml``),
-    then ``os.environ`` (populated from ``.env`` via load_dotenv or the shell).
+    Order: key entered in Streamlit session (sidebar) first, then ``st.secrets``
+    (Streamlit Cloud / ``.streamlit/secrets.toml``), then ``os.environ``
+    (populated from ``.env`` via load_dotenv or the shell).
     Returns None if neither source provides a non-empty key.
     """
+    runtime_key = (st.session_state.get("runtime_groq_api_key") or "").strip()
+    if runtime_key:
+        return runtime_key
     try:
-        if hasattr(st, "secrets") and "GROQ_API_KEY" in st.secrets:
-            val = st.secrets["GROQ_API_KEY"]
-            if val is not None and str(val).strip():
-                return str(val).strip()
+        if hasattr(st, "secrets"):
+            for secret_name in ("GROQ_API_KEY", "GROK_API_KEY"):
+                if secret_name in st.secrets:
+                    val = st.secrets[secret_name]
+                    if val is not None and str(val).strip():
+                        return str(val).strip()
     except (FileNotFoundError, KeyError, RuntimeError, TypeError):
         pass
-    key = (os.environ.get("GROQ_API_KEY") or "").strip()
+    key = (os.environ.get("GROQ_API_KEY") or os.environ.get("GROK_API_KEY") or "").strip()
     return key or None
 
 
@@ -48,6 +54,7 @@ def init_session_state() -> None:
         "chat_session_id": None,
         "session_saved_file_name": "",
         "session_chroma_index_name": "",
+        "runtime_groq_api_key": "",
     }
     for key, val in defaults.items():
         if key not in st.session_state:

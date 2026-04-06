@@ -145,9 +145,19 @@ def main() -> None:
             st.header("Documents")
             if not api_key:
                 st.warning(
-                    "No **GROQ_API_KEY** found. Add it to Streamlit **Secrets** (deployed) "
-                    "or a **.env** / environment variable (local)."
+                    "No **GROQ_API_KEY** found. You can paste it below, or set it in "
+                    "Streamlit **Secrets** (deployed) / **.env** (local)."
                 )
+                st.text_input(
+                    "Groq API Key",
+                    key="runtime_groq_api_key",
+                    type="password",
+                    placeholder="gsk_...",
+                    help="Used only for this active app session.",
+                )
+                api_key = get_groq_api_key()
+                if api_key:
+                    st.success("Using API key from sidebar input.")
             else:
                 st.success("Ready — API key configured.")
 
