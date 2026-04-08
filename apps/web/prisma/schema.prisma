@@ -1,0 +1,116 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum DocumentStatus {
+  UPLOADED
+  PARSING
+  CHUNKING
+  EMBEDDING
+  READY
+  FAILED
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+model Project {
+  id              String          @id @default(cuid())
+  title           String
+  description     String?
+  vectorNamespace String          @unique
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  documents       Document[]
+  conversations   Conversation[]
+  DocumentChunk   DocumentChunk[]
+}
+
+model Document {
+  id              String          @id @default(cuid())
+  projectId       String
+  project         Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  fileName        String
+  mimeType        String
+  sourceUrl       String?
+  checksum        String?
+  status          DocumentStatus  @default(UPLOADED)
+  statusMessage   String?
+  parsingDoneAt   DateTime?
+  chunkingDoneAt  DateTime?
+  embeddingDoneAt DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  chunks          DocumentChunk[]
+  citations       Citation[]
+
+  @@index([projectId, status])
+}
+
+model DocumentChunk {
+  id           String     @id @default(cuid())
+  documentId   String
+  document     Document   @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  projectId    String
+  project      Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  chunkIndex   Int
+  content      String
+  tokenCount   Int?
+  pageNumber   Int?
+  startOffset  Int?
+  endOffset    Int?
+  vectorId     String?    @unique
+  embedding    Unsupported("vector(1536)")?
+  metadataJson Json?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  citations    Citation[]
+
+  @@unique([documentId, chunkIndex])
+  @@index([projectId, documentId])
+}
+
+model Conversation {
+  id        String    @id @default(cuid())
+  projectId String
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  messages  Message[]
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           MessageRole
+  content        String
+  createdAt      DateTime     @default(now())
+  citations      Citation[]
+}
+
+model Citation {
+  id          String        @id @default(cuid())
+  messageId   String
+  message     Message       @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  documentId  String
+  document    Document      @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  chunkId     String
+  chunk       DocumentChunk @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+  anchorLabel String
+  quote       String
+  score       Float?
+  createdAt   DateTime      @default(now())
+
+  @@index([messageId])
+  @@index([documentId, chunkId])
+}

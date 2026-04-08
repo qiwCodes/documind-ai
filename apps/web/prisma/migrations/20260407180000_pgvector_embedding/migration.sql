@@ -1,0 +1,3 @@
+CREATE EXTENSION IF NOT EXISTS vector;
+
+ALTER TABLE "DocumentChunk" ADD COLUMN IF NOT EXISTS "embedding" vector(1536);

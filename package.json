@@ -1,0 +1,15 @@
+{
+  "name": "documind-ai",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace @documind/web",
+    "build": "npm run build --workspace @documind/web",
+    "lint": "npm run lint --workspace @documind/web",
+    "typecheck": "npm run typecheck --workspace @documind/web"
+  }
+}
