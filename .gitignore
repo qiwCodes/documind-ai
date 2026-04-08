@@ -1,5 +1,6 @@
 node_modules
 .env
+.cursor/
 apps/web/.next
 apps/web/node_modules
 /legacy_web_locked/
