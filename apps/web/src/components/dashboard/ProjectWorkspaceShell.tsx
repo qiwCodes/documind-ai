@@ -137,7 +137,10 @@ export function ProjectWorkspaceShell({ projectId, projectTitle }: { projectId: 
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title: "New chat" }),
     });
-    if (!res.ok) return "";
+    if (!res.ok) {
+      setError("Failed to create chat. Please try again.");
+      return "";
+    }
     const data = (await res.json()) as { conversation: Conversation };
     setConversations((prev) => [data.conversation, ...prev]);
     setConversationId(data.conversation.id);
@@ -147,9 +150,15 @@ export function ProjectWorkspaceShell({ projectId, projectTitle }: { projectId: 
 
   async function uploadFiles(fileList: FileList | null) {
     if (!fileList || fileList.length === 0) return;
+    setError(null);
     const fd = new FormData();
     Array.from(fileList).forEach((file) => fd.append("files", file));
-    await fetch(`/api/projects/${projectId}/ingest`, { method: "POST", body: fd });
+    const res = await fetch(`/api/projects/${projectId}/ingest`, { method: "POST", body: fd });
+    if (!res.ok) {
+      const payload = (await res.json().catch(() => null)) as { error?: string } | null;
+      setError(payload?.error ?? "Upload failed. Check file format and try again.");
+      return;
+    }
     await refreshDocuments();
   }
 
@@ -192,7 +201,10 @@ export function ProjectWorkspaceShell({ projectId, projectTitle }: { projectId: 
       if (!activeConversationId) {
         activeConversationId = await createConversation();
       }
-      if (!activeConversationId) throw new Error("Create chat first");
+      if (!activeConversationId) {
+        // createConversation already set the error
+        return;
+      }
 
       const userText = input.trim();
       const history = messages

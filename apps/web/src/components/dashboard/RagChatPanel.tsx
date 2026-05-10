@@ -131,7 +131,8 @@ export function RagChatPanel({ projects }: RagChatPanelProps) {
         activeConversationId = await createConversation();
       }
       if (!activeConversationId) {
-        throw new Error("Please create a chat first");
+        // createConversation already set the error
+        return;
       }
 
       const userMessage = question.trim();

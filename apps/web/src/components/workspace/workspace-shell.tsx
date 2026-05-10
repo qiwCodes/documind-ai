@@ -149,6 +149,12 @@ export function WorkspaceShell() {
   }
 
   useEffect(() => {
+    if (!errorMessage) return;
+    const timer = setTimeout(() => setErrorMessage(null), 5000);
+    return () => clearTimeout(timer);
+  }, [errorMessage]);
+
+  useEffect(() => {
     setIsHydrated(true);
     const storedTheme = window.localStorage.getItem("documind.theme");
     const darkEnabled = storedTheme === "dark";
